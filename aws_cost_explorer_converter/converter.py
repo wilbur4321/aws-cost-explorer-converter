@@ -37,7 +37,7 @@ class CostExplorerConverter:
             args['Metrics'] = metrics
 
         if group_by:
-            args['GroupBy'] = filter
+            args['GroupBy'] = group_by
 
         if filter:
             args['Filter'] = filter
@@ -46,6 +46,9 @@ class CostExplorerConverter:
 
     def to_array(self, start = None, end = None, granularity = None, metrics = None, group_by = None, filter = None):
         args = self._do_args(self.common_args.copy(), start, end, granularity, metrics, group_by, filter)
+
+        if 'GroupBy' in args:
+            group_names = [ (group['Type'] + ':' + group['Key']) for group in args['GroupBy'] ]
 
         records = []
 
@@ -73,13 +76,25 @@ class CostExplorerConverter:
 
         rows = []
         for record in records:
+            pprint(record)
             row = {
                     'estimated':    record['Estimated'],
                     'start':        record['TimePeriod']['Start'],
-                    'end':          record['TimePeriod']['End'],
-                    'amount':       record['Total']['UnblendedCost']['Amount']
+                    'end':          record['TimePeriod']['End']
                     }
-            rows.append(row)
+
+            groups = record['Groups']
+            if not groups:
+                row['amount'] = record['Total']['UnblendedCost']['Amount']
+                rows.append(row)
+            else:
+                for group in groups:
+                    r = row.copy()
+                    r['amount'] = group['Metrics']['UnblendedCost']['Amount']
+                    keys = group['Keys']
+                    for i in range(len(group_names)):
+                        r[group_names[i]] = keys[i]
+                    rows.append(r)
 
         return rows
 
