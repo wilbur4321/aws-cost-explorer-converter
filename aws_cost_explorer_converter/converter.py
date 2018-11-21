@@ -20,12 +20,23 @@ class CostExplorerConverter:
         if start and not end:
             end = date.today()
         elif end and not start:
+            # TODO: this doesn't work if end is passed in as a string
             start = end - timedelta(days = 1)
 
         if start and end:
+            try:
+                start = start.isoformat()
+            except:
+                pass
+
+            try:
+                end = end.isoformat()
+            except:
+                pass
+
             args['TimePeriod'] = {
-                    'Start': start.isoformat(),
-                    'End': end.isoformat()
+                    'Start': start,
+                    'End': end
                     #'Start': start.replace(microsecond=0).isoformat() + 'Z',
                     #'End': end.replace(microsecond=0).isoformat() + 'Z'
                     }
@@ -62,9 +73,9 @@ class CostExplorerConverter:
             if not response:
                 raise Exception('No response recieved from AWS get_cost_and_usage')
 
-            print('Response:')
+            #print('Response:')
             #pprint(response)
-            print('')
+            #print('')
 
             records.extend(response['ResultsByTime'])
 
