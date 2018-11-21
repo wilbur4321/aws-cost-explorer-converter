@@ -63,20 +63,20 @@ class CostExplorerConverter:
                 raise Exception('No response recieved from AWS get_cost_and_usage')
 
             print('Response:')
-            pprint(response)
+            #pprint(response)
             print('')
 
             records.extend(response['ResultsByTime'])
 
-            if 'nextToken' in response:
+            if 'NextPageToken' in response:
                 ## TODO: test looping
-                args['NextPageToken'] = response['nextToken']
+                args['NextPageToken'] = response['NextPageToken']
             else:
                 done = True
 
         rows = []
         for record in records:
-            pprint(record)
+            #pprint(record)
             row = {
                     'estimated':    record['Estimated'],
                     'start':        record['TimePeriod']['Start'],
