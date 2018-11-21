@@ -11,6 +11,8 @@ def main():
             start = date.today() - timedelta(days = 5),
             #start = date.today().replace(day = 1),
             granularity = 'DAILY') \
-                    .convert(filter={ 'Tags': { 'Key': 'AppID', 'Values': [ '01036F7B-C158-426D-ABDD-86609A262CBA' ] } })
-    #pprint(converted)
+                    .to_df(filter={ 'Tags': { 'Key': 'AppID', 'Values': [ '01036F7B-C158-426D-ABDD-86609A262CBA' ] } })
+
+    print('Converted:')
+    pprint(converted)
 
