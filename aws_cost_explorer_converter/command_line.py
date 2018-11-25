@@ -18,6 +18,7 @@ def parse_args():
     parser.add_argument('--end', help='End date')
     parser.add_argument('--granularity', default='DAILY', help='Granularity, MONTHLY, DAILY or HOURLY (untested)')
     parser.add_argument('--filter', type=json.loads, help='JSON filter expression (see AWS documentation)')
+    parser.add_argument('--metrics', type=json.loads, default=['UnblendedCost'], help='JSON metrics expression, eg \'[ "UnblendedCost", "NetUnblendedCost"]\'')
     parser.add_argument('--group-by', type=json.loads, help='JSON group_by expression (see AWS documentation)')
     parser.add_argument('--display', action='store_true', help='Display (truncated) output table')
     parser.add_argument('--out', help='File to store CSV in (not stored if not specified')
@@ -49,7 +50,8 @@ def main():
             end = args.end,
             granularity = args.granularity,
             filter = args.filter,
-            group_by = args.group_by
+            group_by = args.group_by,
+            metrics = args.metrics
         ).to_df()
 
     if args.display:

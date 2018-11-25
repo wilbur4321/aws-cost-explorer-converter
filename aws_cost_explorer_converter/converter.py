@@ -3,6 +3,11 @@ from datetime import timedelta, date
 import logging
 import pandas
 from pprint import pprint
+import re
+
+def camel_to_snake(name):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 class CostExplorerConverter:
     def __init__(self, client, start = None, end = None, granularity = 'DAILY', metrics = [ 'UnblendedCost' ], group_by = None, filter = None):
@@ -59,7 +64,13 @@ class CostExplorerConverter:
         args = self._do_args(self.common_args.copy(), start, end, granularity, metrics, group_by, filter)
 
         if 'GroupBy' in args:
-            group_names = [ (group['Type'] + ':' + group['Key']) for group in args['GroupBy'] ]
+            group_names = []
+            for group in args['GroupBy']:
+                if group['Type'] == 'TAG':
+                    # TODO: more thorough cleaning
+                    group_names.append('tag_' + group['Key'].lower().replace('-', '_'))
+                else:
+                    group_names.append(group['Key'].lower())
 
         records = []
 
@@ -96,15 +107,17 @@ class CostExplorerConverter:
 
             groups = record['Groups']
             if not groups:
-                row['amount'] = record['Total']['UnblendedCost']['Amount']
+                for metric in args['Metrics']:
+                    row[camel_to_snake(metric)] = record['Total'][metric]['Amount']
                 rows.append(row)
             else:
                 for group in groups:
                     r = row.copy()
-                    r['amount'] = group['Metrics']['UnblendedCost']['Amount']
                     keys = group['Keys']
                     for i in range(len(group_names)):
                         r[group_names[i]] = keys[i]
+                    for metric in args['Metrics']:
+                        r[camel_to_snake(metric)] = group['Metrics'][metric]['Amount']
                     rows.append(r)
 
         return rows
