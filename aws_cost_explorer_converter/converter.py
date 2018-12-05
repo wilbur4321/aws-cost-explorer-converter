@@ -5,10 +5,6 @@ import pandas
 from pprint import pprint
 import re
 
-def camel_to_snake(name):
-    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
-
 class CostExplorerConverter:
     def __init__(self, client, start = None, end = None, granularity = 'DAILY', metrics = [ 'UnblendedCost' ], group_by = None, filter = None):
         self.client = client
@@ -20,6 +16,11 @@ class CostExplorerConverter:
             start = end - timedelta(days = 1)
 
         self.common_args = self._do_args({}, start, end, granularity, metrics, group_by, filter)
+
+    @staticmethod
+    def _camel_to_snake(name):
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
     def _do_args(self, args, start, end, granularity, metrics, group_by, filter):
         if start and not end:
@@ -108,7 +109,7 @@ class CostExplorerConverter:
             groups = record['Groups']
             if not groups:
                 for metric in args['Metrics']:
-                    row[camel_to_snake(metric)] = record['Total'][metric]['Amount']
+                    row[CostExplorerConverter._camel_to_snake(metric)] = record['Total'][metric]['Amount']
                 rows.append(row)
             else:
                 for group in groups:
@@ -117,7 +118,7 @@ class CostExplorerConverter:
                     for i in range(len(group_names)):
                         r[group_names[i]] = keys[i]
                     for metric in args['Metrics']:
-                        r[camel_to_snake(metric)] = group['Metrics'][metric]['Amount']
+                        r[CostExplorerConverter._camel_to_snake(metric)] = group['Metrics'][metric]['Amount']
                     rows.append(r)
 
         return rows
