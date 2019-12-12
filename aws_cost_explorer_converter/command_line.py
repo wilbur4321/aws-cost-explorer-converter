@@ -60,6 +60,6 @@ def main():
         print('')
 
     if args.out:
-        converted.to_csv(path_or_buf = args.out, index = False)
+        converted.to_csv(path_or_buf = args.out, index = False, encoding = 'utf-8')
         print('Wrote csv to %s' % (args.out))
 
